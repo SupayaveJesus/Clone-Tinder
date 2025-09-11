@@ -9,4 +9,4 @@ data class Profile(
     val description:String,
     val photos:List<String>,
     //val photoIndex: Int = 0
-)
+): Serializable

@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
+import com.example.tinder.LikesDetailsActivity
 import com.example.tinder.models.Profile
 import com.example.tinder.repositories.ProfileRepository
 import com.example.tinder.ui.theme.TinderTheme
@@ -51,13 +54,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TinderTheme {
-                TinderApp()   // <-- contenedor con estado
+                TinderApp()
             }
         }
     }
 }
 
-/* Contenedor que maneja estado (cola y likes) y llama a MainScreen */
 @Composable
 fun TinderApp() {
     val queue = remember {
@@ -67,6 +69,7 @@ fun TinderApp() {
 
     MainScreen(
         profiles = queue,
+        likes = likes,
         onLike = { p ->
             likes += p
             queue.removeAll { it.id == p.id }
@@ -77,189 +80,231 @@ fun TinderApp() {
     )
 }
 
-/* ===== Pantalla principal: lista de tarjetas ===== */
 @Composable
 fun MainScreen(
     profiles: List<Profile>,
+    likes: List<Profile>,
     onLike: (Profile) -> Unit,
     onDislike: (Profile) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (profiles.isEmpty()) {
+    val context = LocalContext.current
+    val current = profiles.firstOrNull()
+
+    if (current == null) {
         Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = "No more profiles")
+            Text("No more profiles")
         }
     } else {
-        LazyColumn(
-            modifier = modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
-            items(items = profiles, key = { it.id }) { p ->
-                ProfileCardSimple(
-                    profile = p,
-                    onLike = { onLike(p) },
-                    onDislike = { onDislike(p) }
-                )
+
+            ProfileCardSimple(
+                profile = current,
+                onLike = { onLike(current) },
+                onDislike = { onDislike(current) }
+            )
+        }
+    }
+
+    if (likes.isNotEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            contentAlignment = Alignment.TopEnd
+        ) {
+            FloatingActionButton(
+                onClick = {
+                    val intent =
+                        android.content.Intent(context, LikesDetailsActivity::class.java).apply {
+                            putExtra("likes", ArrayList(likes))
+                        }
+                    context.startActivity(intent)
+                },
+                modifier = Modifier
+                    .padding(16.dp),
+                containerColor = Color(0xFF2ECC71),
+                contentColor = Color.White
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Filled.Favorite,
+                        contentDescription = "Ver likes",
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = likes.size.toString(),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
 }
 
-/* ===== Tarjeta estilo Tinder con flechas (sin auto-transición) ===== */
 @Composable
 fun ProfileCardSimple(
     profile: Profile,
     onLike: () -> Unit,
     onDislike: () -> Unit,
 ) {
-    var photoIndex by remember { mutableStateOf(0) } // foto actual del perfil
-    var visible by remember { mutableStateOf(true) } // para fade al dar like/dislike
+    var photoIndex by remember(profile.id) { mutableStateOf(0) } // foto actual del perfil
+    var visible by remember(profile.id) { mutableStateOf(true) } // visibilidad para animación
 
-    AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut()) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(500.dp),
-            shape = RoundedCornerShape(20.dp),
-            elevation = CardDefaults.cardElevation(8.dp)
-        ) {
-            Box(Modifier.fillMaxSize()) {
+    //  AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut()) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(500.dp),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(8.dp)
+    ) {
+        Box(Modifier.fillMaxSize()) {
 
-                // Foto principal
-                Box(
+            // Foto principal
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(470.dp)
+            ) {
+                AsyncImage(
+                    model = profile.photos[photoIndex],
+                    contentDescription = "Foto de ${profile.name}",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                // Barras  por foto
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(470.dp)
+                        .padding(10.dp)
+                        .align(Alignment.TopCenter),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(profile.photos[photoIndex]),
-                        contentDescription = "Foto de ${profile.name}",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-
-                    // Barras superiores de progreso (una por foto)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp)
-                            .align(Alignment.TopCenter),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        profile.photos.forEachIndexed { i, _ ->
-                            Box(
-                                Modifier
-                                    .weight(1f)
-                                    .height(4.dp)
-                                    .clip(RoundedCornerShape(2.dp))
-                                    .background(
-                                        if (i <= photoIndex) Color.White
-                                        else Color.White.copy(alpha = 0.35f)
-                                    )
-                            )
-                        }
-                    }
-
-                    // Flechas manuales para cambiar foto
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 10.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedButton(
-                            onClick = { if (photoIndex > 0) photoIndex-- },
-                            shape = CircleShape,
-                            border = BorderStroke(0.dp, Color.Transparent),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Icon(
-                                Icons.Filled.KeyboardArrowLeft,
-                                contentDescription = "Anterior",
-                                tint = Color.White
-                            )
-                        }
-                        OutlinedButton(
-                            onClick = { if (photoIndex < profile.photos.size - 1) photoIndex++ },
-                            shape = CircleShape,
-                            border = BorderStroke(0.dp, Color.Transparent),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Icon(
-                                Icons.Filled.KeyboardArrowRight,
-                                contentDescription = "Siguiente",
-                                tint = Color.White
-                            )
-                        }
-                    }
-
-                    // Gradiente inferior para legibilidad
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .height(120.dp)
-                            .background(
-                                Brush.verticalGradient(
-                                    listOf(
-                                        Color.Transparent,
-                                        Color.Black.copy(alpha = 0.75f)
-                                    )
+                    profile.photos.forEachIndexed { i, _ ->
+                        Box(
+                            Modifier
+                                .weight(1f)
+                                .height(4.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(
+                                    if (i <= photoIndex) Color.Black
+                                    else Color.Black.copy(alpha = 0.35f)
                                 )
-                            )
-                    )
+                        )
+                    }
                 }
 
-                // Nombre + edad y botones Like/Dislike
-                Column(
+                // cambiar foto
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(
+                        onClick = { if (photoIndex > 0) photoIndex-- },
+                        shape = CircleShape,
+                        border = BorderStroke(0.dp, Color.Transparent),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.KeyboardArrowLeft,
+                            contentDescription = "Anterior",
+                            tint = Color.White
+                        )
+                    }
+                    OutlinedButton(
+                        onClick = { if (photoIndex < profile.photos.size - 1) photoIndex++ },
+                        shape = CircleShape,
+                        border = BorderStroke(0.dp, Color.Transparent),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.KeyboardArrowRight,
+                            contentDescription = "Siguiente",
+                            tint = Color.White
+                        )
+                    }
+                }
+
+                // Gradiente inferior para legibilidad
+                Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp)
-                ) {
-                    Text(
-                        text = "${profile.name} ${profile.age}",
-                        color = Color.White,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        text = profile.description,
-                        color = Color.White.copy(alpha = 0.85f),
-                        fontSize = 16.sp,
-                        lineHeight = 18.sp,
-                        maxLines = 2,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(16.dp))
+                        .height(120.dp)
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color.Transparent,
+                                    Color.Black.copy(alpha = 0.75f)
+                                )
+                            )
+                        )
+                )
+            }
 
-                    //btn
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RoundIconButton(
-                            icon = Icons.Filled.Close,
-                            border = Color(0xFFFF6B81),
-                            iconTint = Color(0xFFFF6B81),
-                            onClick = { visible = false; onDislike() }
-                        )
-                        RoundIconButton(
-                            icon = Icons.Filled.Favorite,
-                            border = Color(0xFF2ECC71),
-                            iconTint = Color(0xFF2ECC71),
-                            onClick = { visible = false; onLike() }
-                        )
-                    }
+            // Nombre + edad  + descriptcion y botones Like/Dislike
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 16.dp)
+            ) {
+                Text(
+                    text = "${profile.name} ${profile.age}",
+                    color = Color.White,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = profile.description,
+                    color = Color.White.copy(alpha = 0.85f),
+                    fontSize = 16.sp,
+                    lineHeight = 18.sp,
+                    maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(16.dp))
+
+                //btn
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RoundIconButton(
+                        icon = Icons.Filled.Close,
+                        border = Color(0xFFFF6B81),
+                        iconTint = Color(0xFFFF6B81),
+                        onClick = { visible = false; onDislike() }
+                    )
+                    RoundIconButton(
+                        icon = Icons.Filled.Favorite,
+                        border = Color(0xFF2ECC71),
+                        iconTint = Color(0xFF2ECC71),
+                        onClick = { visible = false; onLike() }
+                    )
                 }
             }
         }
     }
 }
+
 
 /* Botón circular con borde (aro) e ícono centrado */
 @Composable
@@ -284,9 +329,7 @@ private fun RoundIconButton(
     }
 }
 
-/* =======================
-   PREVIEWS
-   ======================= */
+
 private fun sampleProfiles(): List<Profile> = listOf(
     Profile(
         id = 1,
@@ -335,6 +378,7 @@ fun MainScreenPreview() {
     TinderTheme {
         MainScreen(
             profiles = sampleProfiles(),
+            likes = emptyList(),
             onLike = {},
             onDislike = {}
         )

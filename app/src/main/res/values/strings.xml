@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Tinder</string>
+    <string name="title_activity_details_likes">DetailsLikes</string>
+    <string name="title_activity_likes_details">LikesDetailsActivity</string>
 </resources>
