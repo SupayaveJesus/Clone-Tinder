@@ -46,7 +46,6 @@ class LikesDetailsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
         val likeProfiles =
             intent.getSerializableExtra("likes") as? ArrayList<Profile> ?: arrayListOf()
 

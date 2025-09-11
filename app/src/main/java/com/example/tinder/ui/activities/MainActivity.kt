@@ -1,5 +1,6 @@
 package com.example.tinder.ui.activities
 
+import android.R.attr.visible
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -118,6 +119,7 @@ fun MainScreen(
                 .padding(20.dp),
             contentAlignment = Alignment.TopEnd
         ) {
+            //likes float
             FloatingActionButton(
                 onClick = {
                     val intent =
@@ -159,9 +161,10 @@ fun ProfileCardSimple(
     onDislike: () -> Unit,
 ) {
     var photoIndex by remember(profile.id) { mutableStateOf(0) } // foto actual del perfil
-    var visible by remember(profile.id) { mutableStateOf(true) } // visibilidad para animación
 
+    var visible by remember(profile.id) { mutableStateOf(true) } // visibilidad para animación
     //  AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut()) {
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -200,7 +203,7 @@ fun ProfileCardSimple(
                                 .clip(RoundedCornerShape(2.dp))
                                 .background(
                                     if (i <= photoIndex) Color.Black
-                                    else Color.Black.copy(alpha = 0.35f)
+                                    else Color.White.copy(alpha = 0.35f)
                                 )
                         )
                     }
@@ -240,7 +243,7 @@ fun ProfileCardSimple(
                     }
                 }
 
-                // Gradiente inferior para legibilidad
+                // Gradiente  legibilidad
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -306,7 +309,7 @@ fun ProfileCardSimple(
 }
 
 
-/* Botón circular con borde (aro) e ícono centrado */
+
 @Composable
 private fun RoundIconButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,

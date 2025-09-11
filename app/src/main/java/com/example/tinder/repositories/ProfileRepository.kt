@@ -27,11 +27,11 @@ object ProfileRepository {
         Profile(
             3,"Cathy",  28,  "Passionate about art and painting.",
             listOf(
-                "https://randomuser.me/api/portraits/woman/1.jpg",
-                "https://randomuser.me/api/portraits/woman/2.jpg",
-                "https://randomuser.me/api/portraits/woman/3.jpg",
-                "https://randomuser.me/api/portraits/woman/4.jpg",
-                "https://randomuser.me/api/portraits/woman/5.jpg",
+                "https://randomuser.me/api/portraits/women/91.jpg",
+                "https://randomuser.me/api/portraits/women/92.jpg",
+                "https://randomuser.me/api/portraits/women/93.jpg",
+                "https://randomuser.me/api/portraits/women/94.jpg",
+                "https://randomuser.me/api/portraits/women/95.jpg"
             )
         ),
         Profile(
