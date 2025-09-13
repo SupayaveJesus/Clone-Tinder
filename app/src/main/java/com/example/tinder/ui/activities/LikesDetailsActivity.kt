@@ -1,4 +1,4 @@
-package com.example.tinder
+package com.example.tinder.ui.activities
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -185,7 +186,7 @@ fun LikesDetail(
                         fontSize = 14.sp,
                         color = Color.Gray,
                         maxLines = 2,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }

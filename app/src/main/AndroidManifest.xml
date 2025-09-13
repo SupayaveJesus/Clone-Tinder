@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Tinder">
         <activity
-            android:name=".LikesDetailsActivity"
+            android:name=".ui.activities.LikesDetailsActivity"
             android:exported="false"
             android:label="@string/title_activity_likes_details"
             android:theme="@style/Theme.Tinder" />

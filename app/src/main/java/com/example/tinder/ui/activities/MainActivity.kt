@@ -1,20 +1,13 @@
 package com.example.tinder.ui.activities
 
-import android.R.attr.visible
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,12 +15,12 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -43,8 +36,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import coil3.compose.rememberAsyncImagePainter
-import com.example.tinder.LikesDetailsActivity
 import com.example.tinder.models.Profile
 import com.example.tinder.repositories.ProfileRepository
 import com.example.tinder.ui.theme.TinderTheme
@@ -92,40 +83,40 @@ fun MainScreen(
     val context = LocalContext.current
     val current = profiles.firstOrNull()
 
-    if (current == null) {
-        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("No more profiles")
-        }
-    } else {
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
+    Box(modifier = modifier.fillMaxSize()) {
+        if (current == null) {
+            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("No more profiles")
+            }
+        } else {
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
 
-            ProfileCardSimple(
-                profile = current,
-                onLike = { onLike(current) },
-                onDislike = { onDislike(current) }
-            )
+                ProfileCardSimple(
+                    profile = current,
+                    onLike = { onLike(current) },
+                    onDislike = { onDislike(current) }
+                )
+            }
         }
-    }
 
-    if (likes.isNotEmpty()) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(20.dp),
             contentAlignment = Alignment.TopEnd
         ) {
-            //likes float
             FloatingActionButton(
                 onClick = {
                     val intent =
-                        android.content.Intent(context, LikesDetailsActivity::class.java).apply {
-                            putExtra("likes", ArrayList(likes))
-                        }
+                        android.content.Intent(context, LikesDetailsActivity::class.java)
+                            .apply {
+                                putExtra("likes", ArrayList(likes))
+                            }
                     context.startActivity(intent)
                 },
                 modifier = Modifier
@@ -138,7 +129,7 @@ fun MainScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        Icons.Filled.Favorite,
+                        Icons.Filled.KeyboardArrowRight,
                         contentDescription = "Ver likes",
                         modifier = Modifier.size(20.dp)
                     )
@@ -150,6 +141,7 @@ fun MainScreen(
                     )
                 }
             }
+
         }
     }
 }
@@ -187,7 +179,7 @@ fun ProfileCardSimple(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // Barras  por foto
+                // Barras
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -260,7 +252,7 @@ fun ProfileCardSimple(
                 )
             }
 
-            // Nombre + edad  + descriptcion y botones Like/Dislike
+            // profile
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -307,7 +299,6 @@ fun ProfileCardSimple(
         }
     }
 }
-
 
 
 @Composable
