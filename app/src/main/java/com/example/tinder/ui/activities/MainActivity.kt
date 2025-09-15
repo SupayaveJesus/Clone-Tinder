@@ -152,9 +152,9 @@ fun ProfileCardSimple(
     onLike: () -> Unit,
     onDislike: () -> Unit,
 ) {
-    var photoIndex by remember(profile.id) { mutableStateOf(0) } // foto actual del perfil
+    var photoIndex by remember(profile.id) { mutableStateOf(0) }
 
-    var visible by remember(profile.id) { mutableStateOf(true) } // visibilidad para animación
+    var visible by remember(profile.id) { mutableStateOf(true) }
     //  AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut()) {
 
     Card(
@@ -166,7 +166,6 @@ fun ProfileCardSimple(
     ) {
         Box(Modifier.fillMaxSize()) {
 
-            // Foto principal
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -179,7 +178,6 @@ fun ProfileCardSimple(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // Barras
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -201,7 +199,6 @@ fun ProfileCardSimple(
                     }
                 }
 
-                // cambiar foto
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
@@ -235,7 +232,6 @@ fun ProfileCardSimple(
                     }
                 }
 
-                // Gradiente  legibilidad
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -252,7 +248,6 @@ fun ProfileCardSimple(
                 )
             }
 
-            // profile
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -276,7 +271,6 @@ fun ProfileCardSimple(
                 )
                 Spacer(Modifier.height(16.dp))
 
-                //btn
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
